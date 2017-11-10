@@ -1,0 +1,174 @@
+#!/bin/env bash
+
+# author: Sebastiaan Van Hoecke
+# NOTE: I did not write the regex, A couple of years ago I found them on github but I can't find them again so if you know who is the legal owner please tell me
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# VARIABLES
+# -----------------------------------------------------------------------------------------------------------------------------
+
+IFS=$'\n'
+TPB="https://pirateproxy.cam"
+LIMIT=50
+ORDER=7
+URL=
+QUERY=
+REQUEST=
+MAGNET=
+
+numbcolor='\x1b[38;5;4m'
+namecolor='\x1b[38;5;3m'
+sizecolor='\x1b[38;5;5m'
+seedcolor='\x1b[38;5;2m'
+peercolor='\x1b[38;5;1m'
+nonecolor='\x1b[0m'
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# FUNCTIONS
+# -----------------------------------------------------------------------------------------------------------------------------
+
+check_args () {
+
+    if [[ "$#" -eq "0" ]]; then
+
+        usage
+
+    fi
+
+    while getopts :smo:l: opt; do
+
+        case $opt in
+
+            l)  LIMIT=$OPTARG;;
+            o)  ORDER=$OPTARG;;
+            s)  URL="top/205";;
+            m)  URL="top/201";;
+            ?)  usage;; 
+
+        esac
+
+    done
+
+    shift "$(expr $OPTIND - 1)"
+
+    QUERY=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
+
+}
+
+get_url_source () {
+
+    if [ -z "$QUERY" ]; then
+
+        while [[ $REQUEST == "" ]]; do
+
+            REQUEST=$(curl -k -A Mozilla -b 'lw=s' -m $LIMIT -s "$TPB/$URL" \
+            | grep -Eo '^<div class=\"detName\".*|^<a href="magnet.*|Size [0-9]*.[0.9]*|<td align=\"right\">[^<]*' \
+            | tr -d '\t' \
+            | sed 's!^<div class=\"detName\"><a href=\"/torrent/[^>]*>!!; s!</a>$!!;s!^<a href=\"!!; s!^<td [^>]*>!!; s!" title.*!!g; s/|/!/g ' \
+            | sed  'N;N;N;N;s!\n!|!g')
+
+            echo "."
+
+        done
+
+    else 
+
+	    URL='search/'"$QUERY"'/0/'"$ORDER"'/0'
+
+        while [[ $REQUEST == "" ]]; do
+
+            REQUEST=`curl -k -A Mozilla -b "lw=s" -m $LIMIT -s "$TPB/$URL" \
+            | grep -Eo '^<td><a href=\"/torrent/[^>]*>.*|^<td><nobr><a href=\"[^"]*|<td align=\"right\">[^<]*' \
+            | sed  's!^<td><a href=\"/torrent/[^>]*>!!; \
+                s!</a>$!!; \
+                s!^<td><nobr><a href=\"!!; \
+                s!^<td [^>]*>!!; \
+                s!&nbsp;!\ !g; \
+                s/|/!/g' \
+            | sed  'N;N;N;N;s!\n!|!g'`
+
+            echo "."
+
+        done
+
+    fi
+
+}
+
+download_torrent () {
+
+    echo "$REQUEST" \
+    | head -n "$LIMIT" \
+    | awk -v N=1 \
+    -v NU="$numbcolor" \
+    -v NA="$namecolor" \
+    -v SI="$sizecolor" \
+    -v SE="$seedcolor" \
+    -v PE="$peercolor" \
+    -v NO="$nonecolor" \
+    -F '|' \
+    '{print NU N ") " NA $1 " " SI $3 " " SE $4 " " PE $5 NO; N++}'
+
+    read -p ">> Torrent to download (eg. 1 3 5 7): " selection
+
+    MAGNET="`echo "$REQUEST" | awk -F '|' 'NR=='$selection'{print $2; exit}'`"
+
+    # [ -f "/usr/sbin/xsel" ] && echo $MAGNET | xsel -b && echo "copied to clipboard"
+    [ -f "/usr/sbin/rtorrent" ] && exec /usr/sbin/rtorrent $MAGNET
+
+}
+
+usage () {
+
+cat << _EOF_
+  Usage: ${0} [OPTIONS]... [ARGS]...
+
+    Very simple bash script to download any magnet link from the TPB and load them up in rtorrent.
+
+  OPTIONS: 
+  
+    -m                  Top movies
+    -s                  Top series
+    -h                  Usage
+    -l <limit>          Size of the output list
+    -o <order>          Order of your search query
+
+                        1 - name ascending; 
+                        2 - name descending;
+                        3 - recent first; 
+                        4 - oldest first;
+                        5 - size descending; 
+                        6 - size ascending;
+                        7 - seeds descending; 
+                        8 - seeds ascending;
+                        9 - leechers descending; 
+                        10 - leechers ascending;
+
+    -?                  Usage
+
+  EXAMPLES:
+    
+    pirate -l 60 -m
+    pirate -l 10 -o 99 "legal movies"
+
+_EOF_
+
+exit 1
+
+}
+
+main () {
+
+    check_args "${@}"
+    get_url_source
+    download_torrent
+
+}
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# MAIN
+# -----------------------------------------------------------------------------------------------------------------------------
+
+main "${@}"
+
+unset IFS
