@@ -51,7 +51,8 @@ check_args () {
 
     shift "$(expr $OPTIND - 1)"
 
-    QUERY=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
+    # QUERY=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
+    QUERY=$*
 
 }
 
@@ -72,6 +73,8 @@ get_url_source () {
         done
 
     else 
+
+        echo "Searching for: $QUERY"
 
 	    URL='search/'"$QUERY"'/0/'"$ORDER"'/0'
 
