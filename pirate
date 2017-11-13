@@ -1,7 +1,18 @@
 #!/bin/env bash
 
+# -----------------------------------------------------------------------------------------------------------------------------
+# GENERAL
+# -----------------------------------------------------------------------------------------------------------------------------
+#
 # author: Sebastiaan Van Hoecke
-# NOTE: I did not write the regex, A couple of years ago I found them on github but I can't find them again so if you know who is the legal owner please tell me
+# mail: sebastiaan@sevaho.io
+#
+# NOTE: 
+#
+# I did not write the regex, A couple of years ago I found them on github 
+# but I can't find them again so if you know who is the legal owner please tell me
+#
+# -----------------------------------------------------------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------------------------------------------------------
 # VARIABLES
