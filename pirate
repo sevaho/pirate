@@ -20,12 +20,6 @@
 
 IFS=$'\n'
 TPB="https://pirateproxy.cam"
-LIMIT=50
-ORDER=7
-URL=
-QUERY=
-REQUEST=
-MAGNET=
 
 numbcolor='\x1b[38;5;4m'
 namecolor='\x1b[38;5;3m'
@@ -37,35 +31,6 @@ nonecolor='\x1b[0m'
 # -----------------------------------------------------------------------------------------------------------------------------
 # FUNCTIONS
 # -----------------------------------------------------------------------------------------------------------------------------
-
-check_args () {
-
-    if [[ "$#" -eq "0" ]]; then
-
-        usage
-
-    fi
-
-    while getopts :smo:l: opt; do
-
-        case $opt in
-
-            l)  LIMIT=$OPTARG;;
-            o)  ORDER=$OPTARG;;
-            s)  URL="top/205";;
-            m)  URL="top/201";;
-            ?)  usage;; 
-
-        esac
-
-    done
-
-    shift "$(expr $OPTIND - 1)"
-
-    # QUERY=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
-    QUERY=$*
-
-}
 
 get_url_source () {
 
@@ -132,6 +97,35 @@ download_torrent () {
 
 }
 
+check_args () {
+
+    if [[ "$#" -eq "0" ]]; then
+
+        usage
+
+    fi
+
+    while getopts :smo:l: opt; do
+
+        case $opt in
+
+            l)  LIMIT=$OPTARG;;
+            o)  ORDER=$OPTARG;;
+            s)  URL="top/205";;
+            m)  URL="top/201";;
+            ?)  usage;; 
+
+        esac
+
+    done
+
+    shift "$(expr $OPTIND - 1)"
+
+    # QUERY=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
+    QUERY=$*
+
+}
+
 usage () {
 
 cat << _EOF_
@@ -175,6 +169,13 @@ exit 1
 # -----------------------------------------------------------------------------------------------------------------------------
 
 main () {
+
+    LIMIT=50
+    ORDER=7
+    URL=
+    QUERY=
+    REQUEST=
+    MAGNET=
 
     check_args "${@}"
     get_url_source
