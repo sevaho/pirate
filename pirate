@@ -34,11 +34,11 @@ nonecolor='\x1b[0m'
 
 get_url_source () {
 
-    if [ -z "$QUERY" ]; then
+    if [ -z "$query" ]; then
 
-        while [[ $REQUEST == "" ]]; do
+        while [[ $request == "" ]]; do
 
-            REQUEST=$(curl -k -A Mozilla -b 'lw=s' -m $LIMIT -s "$TPB/$URL" \
+            request=$(curl -k -A Mozilla -b 'lw=s' -m $limit -s "$TPB/$url" \
             | grep -Eo '^<div class=\"detName\".*|^<a href="magnet.*|Size [0-9]*.[0.9]*|<td align=\"right\">[^<]*' \
             | tr -d '\t' \
             | sed 's!^<div class=\"detName\"><a href=\"/torrent/[^>]*>!!; s!</a>$!!;s!^<a href=\"!!; s!^<td [^>]*>!!; s!" title.*!!g; s/|/!/g ' \
@@ -50,13 +50,13 @@ get_url_source () {
 
     else 
 
-        echo "Searching for: $QUERY"
+        echo "Searching for: $query"
 
-	    URL='search/'"$QUERY"'/0/'"$ORDER"'/0'
+	    url='search/'"$query"'/0/'"$order"'/0'
 
-        while [[ $REQUEST == "" ]]; do
+        while [[ $request == "" ]]; do
 
-            REQUEST=`curl -k -A Mozilla -b "lw=s" -m $LIMIT -s "$TPB/$URL" \
+            request=`curl -k -A Mozilla -b "lw=s" -m $limit -s "$TPB/$url" \
             | grep -Eo '^<td><a href=\"/torrent/[^>]*>.*|^<td><nobr><a href=\"[^"]*|<td align=\"right\">[^<]*' \
             | sed  's!^<td><a href=\"/torrent/[^>]*>!!; \
                 s!</a>$!!; \
@@ -76,8 +76,8 @@ get_url_source () {
 
 download_torrent () {
 
-    echo "$REQUEST" \
-    | head -n "$LIMIT" \
+    echo "$request" \
+    | head -n "$limit" \
     | awk -v N=1 \
     -v NU="$numbcolor" \
     -v NA="$namecolor" \
@@ -90,10 +90,10 @@ download_torrent () {
 
     read -p ">> Torrent to download (eg. 1 3 5 7): " selection
 
-    MAGNET="`echo "$REQUEST" | awk -F '|' 'NR=='$selection'{print $2; exit}'`"
+    magnet="`echo "$request" | awk -F '|' 'NR=='$selection'{print $2; exit}'`"
 
-    # [ -f "/usr/sbin/xsel" ] && echo $MAGNET | xsel -b && echo "copied to clipboard"
-    [ -f "/usr/sbin/rtorrent" ] && exec /usr/sbin/rtorrent $MAGNET
+    # [ -f "/usr/sbin/xsel" ] && echo $magnet | xsel -b && echo "copied to clipboard"
+    [ -f "/usr/sbin/rtorrent" ] && exec /usr/sbin/rtorrent $magnet
 
 }
 
@@ -109,10 +109,10 @@ check_args () {
 
         case $opt in
 
-            l)  LIMIT=$OPTARG;;
-            o)  ORDER=$OPTARG;;
-            s)  URL="top/205";;
-            m)  URL="top/201";;
+            l)  limit=$OPTARG;;
+            o)  order=$OPTARG;;
+            s)  url="top/205";;
+            m)  url="top/201";;
             ?)  usage;; 
 
         esac
@@ -121,8 +121,8 @@ check_args () {
 
     shift "$(expr $OPTIND - 1)"
 
-    # QUERY=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
-    QUERY=$*
+    # query=`echo "$*" | tr -d '\n' | od -t x1 -A n | tr ' ' '%'`
+    query=$*
 
 }
 
@@ -170,12 +170,12 @@ exit 1
 
 main () {
 
-    LIMIT=50
-    ORDER=7
-    URL=
-    QUERY=
-    REQUEST=
-    MAGNET=
+    local limit=50
+    local order=7
+    local url=
+    local query=
+    local request=
+    local magnet=
 
     check_args "${@}"
     get_url_source
