@@ -19,8 +19,8 @@
 # -----------------------------------------------------------------------------------------------------------------------------
 
 IFS=$'\n'
-TPB="https://pirateproxy.cam"
-
+# TPB="https://pirateproxy.cam"
+TPB="https://pirateproxy.ist"
 numbcolor='\x1b[38;5;4m'
 namecolor='\x1b[38;5;3m'
 sizecolor='\x1b[38;5;5m'
@@ -80,7 +80,7 @@ download_torrent () {
     | head -n "$limit" \
     | awk -v N=1 \
     -v NU="$numbcolor" \
-    -v NA="$namecolor" \
+    -v NA="$namecolor\t" \
     -v SI="$sizecolor" \
     -v SE="$seedcolor" \
     -v PE="$peercolor" \
