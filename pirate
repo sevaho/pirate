@@ -92,8 +92,21 @@ download_torrent () {
 
     magnet="`echo "$request" | awk -F '|' 'NR=='$selection'{print $2; exit}'`"
 
-    # [ -f "/usr/sbin/xsel" ] && echo $magnet | xsel -b && echo "copied to clipboard"
-    [ -f "/usr/sbin/rtorrent" ] && exec /usr/sbin/rtorrent $magnet
+    if [[ $(pgrep rtorrent) ]]; then
+        
+        echo ""
+        [ -f "/usr/sbin/xsel" ] && echo $magnet | xsel -b && echo "--- copied to clipboard xsel ---"
+
+        echo ""
+        echo -e "\e[1;32mMAGNET LINK:\e[0m"
+        echo ""
+        echo -e "\e[1;33m$magnet\e[0m"
+    
+    else
+
+        [ -f "/usr/sbin/rtorrent" ] && exec /usr/sbin/rtorrent $magnet
+
+    fi
 
 }
 
