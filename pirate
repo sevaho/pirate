@@ -19,8 +19,18 @@
 # -----------------------------------------------------------------------------------------------------------------------------
 
 IFS=$'\n'
-# TPB="https://pirateproxy.cam"
-TPB="https://pirateproxy.ist"
+
+declare -a PIRATE_PROXIES=(
+
+    "https://tpbduck.com"
+    "https://pirateproxy.ist"
+    "https://thepiratebay.red"
+    "https://thehiddenbay.ws"
+    "https://piratebayblocked.com"
+    "https://ikwilthepiratebay.org"
+
+)
+
 numbcolor='\x1b[38;5;4m'
 namecolor='\x1b[38;5;3m'
 sizecolor='\x1b[38;5;5m'
@@ -34,11 +44,22 @@ nonecolor='\x1b[0m'
 
 get_url_source () {
 
+    local counter=0
+    local link=0
+
     if [ -z "$query" ]; then
 
         while [[ $request == "" ]]; do
 
-            request=$(curl -k -A Mozilla -b 'lw=s' -m $limit -s "$TPB/$url" \
+            ((counter++))
+
+            if [[ $counter -gt 10 ]]; then
+
+                ((link++))
+
+            fi
+
+            request=$(curl -k -A Mozilla -b 'lw=s' -m $limit -s "${PIRATE_PROXIES[$link]}/$url" \
             | grep -Eo '^<div class=\"detName\".*|^<a href="magnet.*|Size [0-9]*.[0.9]*|<td align=\"right\">[^<]*' \
             | tr -d '\t' \
             | sed 's!^<div class=\"detName\"><a href=\"/torrent/[^>]*>!!; s!</a>$!!;s!^<a href=\"!!; s!^<td [^>]*>!!; s!" title.*!!g; s/|/!/g ' \
@@ -56,7 +77,15 @@ get_url_source () {
 
         while [[ $request == "" ]]; do
 
-            request=`curl -k -A Mozilla -b "lw=s" -m $limit -s "$TPB/$url" \
+            ((counter++))
+
+            if [[ $counter -gt 10 ]]; then
+
+                ((link++))
+
+            fi
+
+            request=`curl -k -A Mozilla -b "lw=s" -m $limit -s "${PIRATE_PROXIES[$link]}/$url" \
             | grep -Eo '^<td><a href=\"/torrent/[^>]*>.*|^<td><nobr><a href=\"[^"]*|<td align=\"right\">[^<]*' \
             | sed  's!^<td><a href=\"/torrent/[^>]*>!!; \
                 s!</a>$!!; \
