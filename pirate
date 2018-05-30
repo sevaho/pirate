@@ -22,8 +22,9 @@ IFS=$'\n'
 
 declare -a PIRATE_PROXIES=(
 
-    "https://tpbduck.com"
+    "https://pirateproxy.sh"
     "https://pirateproxy.ist"
+    "https://tpbduck.com"
     "https://thepiratebay.red"
     "https://thehiddenbay.ws"
     "https://piratebayblocked.com"
